@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth, signOut } from "../firebase-config";
+import { initializeApp } from 'firebase/app';
+import { getAuth, signOut } from 'firebase/auth';
+
+let auth;
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
@@ -12,6 +15,13 @@ export default function ChatPage() {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    // Initialize Firebase only on the client side
+    const firebaseConfig = {
+      // Your Firebase configuration
+    };
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
         router.push('/login');
