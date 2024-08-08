@@ -26,6 +26,7 @@ BotBuddy is your friendly AI assistant, offering natural conversations and probl
 - Landing Page: Introduces the app and provides login/register options
 - Login Page: User authentication
 - Register Page: New user registration
+- Latest API Integration: Gemini API integration for enhanced performance and accuracy.
 
 ## Contributing
 
