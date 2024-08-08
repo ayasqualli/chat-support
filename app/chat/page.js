@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signOut } from 'firebase/auth';
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 
 let auth;
 
@@ -11,25 +11,45 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [firebaseInitialized, setFirebaseInitialized] = useState(false);
   const router = useRouter();
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     // Initialize Firebase only on the client side
-    const firebaseConfig = {
-      // Your Firebase configuration
-    };
-    const app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        router.push('/login');
+    if (typeof window !== 'undefined' && !firebaseInitialized) {
+      try {
+        const firebaseConfig = {
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+          authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+          // Add other necessary config fields
+        };
+        console.log('Firebase config:', JSON.stringify(firebaseConfig, null, 2));
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        setFirebaseInitialized(true);
+        console.log('Firebase initialized successfully');
+      } catch (error) {
+        console.error('Error initializing Firebase:', error);
       }
-    });
+    }
+  }, [firebaseInitialized]);
 
-    return () => unsubscribe();
-  }, [router]);
+  useEffect(() => {
+    if (firebaseInitialized && auth) {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          console.log('No user found, redirecting to login');
+          router.push('/login');
+        } else {
+          console.log('User authenticated:', user.uid);
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [router, firebaseInitialized]);
 
   useEffect(() => {
     scrollToBottom();
@@ -77,6 +97,10 @@ export default function ChatPage() {
       console.error('Error logging out:', error);
     }
   };
+
+  if (!firebaseInitialized) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container">
