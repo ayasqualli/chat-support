@@ -15,16 +15,20 @@
 
   --text-primary: #333333;
   --text-secondary: #666666;
+
+  /* Light mode variables */
+  --background-color: #ffffff;
+  --text-color: #000000;
+  /* Add more variables as needed */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-rgb: 18, 18, 18;
+.light {
+  color-scheme: light;
+}
 
-    --text-primary: #ffffff;
-    --text-secondary: #cccccc;
-  }
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 * {
